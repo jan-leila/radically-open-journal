@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RO Diary settings</title>
+<style>
+  :root {
+    --bg: #f4f3f7; --card: #ffffff; --text: #1d1b22; --muted: #6a6675;
+    --line: #dcd9e4; --accent: #5b3fa8; --accent-text: #ffffff; --danger: #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141218; --card: #211f27; --text: #ece9f3; --muted: #a39fb0;
+      --line: #3a3743; --accent: #b9a2ff; --accent-text: #1d1038; --danger: #ffb4ab;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px 16px 96px; background: var(--bg); color: var(--text);
+    font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 4px 0 16px; }
+  h2 { font-size: 17px; margin: 0 0 4px; }
+  section { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  p.hint { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+  .field { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
+  .field + .field { border-top: 1px solid var(--line); }
+  input[type=text], input[type=time], select, textarea {
+    font: inherit; color: inherit; background: var(--bg); border: 1px solid var(--line);
+    border-radius: 8px; padding: 8px 10px; min-height: 42px;
+  }
+  input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--accent); }
+  button {
+    font: inherit; font-weight: 600; color: var(--accent); background: transparent;
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; min-height: 42px;
+  }
+  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  button:disabled { opacity: 0.4; }
+  ul.fixed { margin: 0; padding-left: 20px; }
+  ul.fixed span { color: var(--muted); font-size: 14px; }
+  .question { padding: 10px 0; border-top: 1px solid var(--line); }
+  .question:first-child { border-top: 0; }
+  .question input[type=text] { width: 100%; }
+  .question .row { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+  .question .row select { flex: 1; min-width: 0; }
+  .question .row button { min-width: 42px; padding: 8px; }
+  .question .remove { color: var(--danger); }
+  .empty { color: var(--muted); font-size: 14px; padding: 4px 0 0; }
+  button.add { margin-top: 12px; }
+  .buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .week { width: 100%; }
+  .table-wrap { overflow-x: auto; margin-top: 12px; border: 1px solid var(--line); border-radius: 8px; }
+  table { border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+  th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+  th { background: var(--bg); }
+  tr:last-child td { border-bottom: 0; }
+  textarea { width: 100%; height: 120px; margin-top: 12px; font: 12px/1.4 ui-monospace, Menlo, monospace; white-space: pre; }
+  #status { color: var(--muted); font-size: 14px; margin: 8px 0 0; min-height: 20px; }
+  footer {
+    position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px;
+    background: var(--card); border-top: 1px solid var(--line);
+  }
+  footer button { display: block; width: 100%; max-width: 640px; margin: 0 auto; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>RO Diary</h1>
+
+  <section>
+    <h2>Daily reminder</h2>
+    <p class="hint">Your watch buzzes at this time with Snooze, Start and Ignore. A card filled in before 4am counts for the day before.</p>
+    <label class="field"><span>Remind me</span><input type="checkbox" id="reminderEnabled"></label>
+    <label class="field"><span>Time</span><input type="time" id="reminderTime"></label>
+    <label class="field"><span>Snooze for</span>
+      <select id="snooze">
+        <option value="5">5 minutes</option>
+        <option value="10">10 minutes</option>
+        <option value="15">15 minutes</option>
+        <option value="30">30 minutes</option>
+        <option value="60">1 hour</option>
+      </select>
+    </label>
+  </section>
+
+  <section>
+    <h2>Daily</h2>
+    <p class="hint">Always asked first.</p>
+    <ul class="fixed">
+      <li>Urge to commit suicide <span>(0&ndash;5)</span></li>
+      <li>Taken prescribed meds <span>(yes / no)</span></li>
+      <li>Other drugs &amp; alcohol <span>(yes / no)</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Thoughts, Sensations, Emotions</h2>
+    <p class="hint">What you want to track each day in this part of the card.</p>
+    <div id="list1"></div>
+    <button type="button" class="add" data-section="1">Add a question</button>
+  </section>
+
+  <section>
+    <h2>Social Signaling</h2>
+    <p class="hint">Social signaling behaviours you want to track each day.</p>
+    <div id="list2"></div>
+    <button type="button" class="add" data-section="2">Add a question</button>
+  </section>
+
+  <section>
+    <h2>Reports</h2>
+    <p class="hint">One row per day, one column per question. Reports use what is already saved, including questions you have since removed.</p>
+    <label class="field"><span>Week starts on</span>
+      <select id="weekStart">
+        <option value="1">Monday</option>
+        <option value="0">Sunday</option>
+        <option value="6">Saturday</option>
+      </select>
+    </label>
+    <select id="week" class="week" aria-label="Week"></select>
+    <div class="buttons">
+      <button type="button" class="primary" id="weekReport">Weekly report</button>
+      <button type="button" id="allReport">Entire dataset</button>
+    </div>
+
+    <div id="report" hidden>
+      <div class="table-wrap"><table id="preview"></table></div>
+      <div class="buttons">
+        <button type="button" id="download">Download .csv</button>
+        <button type="button" id="share" hidden>Share&hellip;</button>
+        <button type="button" id="copy">Copy for spreadsheet</button>
+      </div>
+      <p id="status" role="status"></p>
+      <textarea id="csv" readonly aria-label="Report as CSV"></textarea>
+    </div>
+  </section>
+</main>
+
+<footer><button type="button" class="primary" id="save">Save</button></footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var MAX_CUSTOM = 24;
+  var FIXED = [
+    { id: 1, type: 0, label: 'Urge to commit suicide' },
+    { id: 2, type: 1, label: 'Taken prescribed meds' },
+    { id: 3, type: 1, label: 'Other drugs & alcohol' }
+  ];
+  var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  // Replaced with real data by the phone app. Opening this file directly in a
+  // browser leaves the placeholder in place and shows sample data instead.
+  var injected = "__STATE__";
+  var standalone = typeof injected === 'string';
+  var state = standalone ? sampleState() : injected;
+  var settings = state.settings;
+  var entries = state.entries || {};
+
+  // Questions being edited. Archived ones are only used for report headings.
+  var questions = settings.questions.filter(function (q) { return !q.archived; })
+    .map(function (q) { return { id: q.id, section: q.section, type: q.type, label: q.label }; });
+
+  var current = null; // the report on screen: { name, rows }
+
+  function $(id) { return document.getElementById(id); }
+
+  // ------------------------------------------------------------------- dates
+
+  function fromKey(key) {
+    var n = Number(key);
+    return new Date(Math.floor(n / 10000), Math.floor(n / 100) % 100 - 1, n % 100);
+  }
+  function toKey(date) {
+    return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  }
+  function addDays(date, days) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+  }
+  function ordinal(n) {
+    var tens = n % 100;
+    if (tens >= 11 && tens <= 13) return n + 'th';
+    return n + (['th', 'st', 'nd', 'rd'][n % 10] || 'th');
+  }
+  // EEE MMM Do yyyy, e.g. "Mon Nov 23rd 2026"
+  function formatDate(date) {
+    return DAYS[date.getDay()] + ' ' + MONTHS[date.getMonth()] + ' ' +
+      ordinal(date.getDate()) + ' ' + date.getFullYear();
+  }
+  function isoDate(date) {
+    function pad(n) { return (n < 10 ? '0' : '') + n; }
+    return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+  }
+  function weekStartOf(date) {
+    var first = Number($('weekStart').value);
+    return addDays(date, -((date.getDay() - first + 7) % 7));
+  }
+  function entryDates() {
+    return Object.keys(entries).map(Number).filter(function (n) { return n > 0; })
+      .sort(function (a, b) { return a - b; });
+  }
+
+  // ----------------------------------------------------------------- reports
+
+  function columnsFor(keys) {
+    var used = {};
+    keys.forEach(function (key) {
+      Object.keys(entries[key] || {}).forEach(function (id) { used[id] = true; });
+    });
+    var bySection = function (section) {
+      return questions.filter(function (q) { return q.section === section && q.label.trim(); });
+    };
+    var columns = FIXED.concat(bySection(1), bySection(2));
+    // Removed questions still get a column when the period has answers for them.
+    settings.questions.forEach(function (q) {
+      if (q.archived && used[q.id]) columns.push(q);
+    });
+    return columns;
+  }
+
+  function cell(question, answers) {
+    var value = answers ? answers[question.id] : undefined;
+    if (value === undefined || value === null) return '';
+    if (question.type === 1) return value ? 'Yes' : 'No';
+    return String(value / 2);
+  }
+
+  function buildRows(first, last) {
+    var days = [];
+    for (var d = first; d <= last; d = addDays(d, 1)) days.push(d);
+    var columns = columnsFor(days.map(toKey));
+    var rows = [['Date'].concat(columns.map(function (q) { return q.label.trim(); }))];
+    days.forEach(function (day) {
+      var answers = entries[toKey(day)];
+      rows.push([formatDate(day)].concat(columns.map(function (q) { return cell(q, answers); })));
+    });
+    return rows;
+  }
+
+  function delimited(rows, separator) {
+    return rows.map(function (row) {
+      return row.map(function (value) {
+        value = String(value);
+        if (separator === '\t') return value.replace(/[\t\r\n]+/g, ' ');
+        return /[",\r\n]/.test(value) ? '"' + value.replace(/"/g, '""') + '"' : value;
+      }).join(separator);
+    }).join('\r\n') + '\r\n';
+  }
+
+  function showReport(name, rows) {
+    current = { name: name, rows: rows };
+    var table = $('preview');
+    table.textContent = '';
+    rows.forEach(function (row, index) {
+      var tr = table.insertRow();
+      row.forEach(function (value) {
+        var el = document.createElement(index === 0 ? 'th' : 'td');
+        el.textContent = value;
+        tr.appendChild(el);
+      });
+    });
+    $('csv').value = delimited(rows, ',');
+    $('status').textContent = '';
+    $('report').hidden = false;
+    $('share').hidden = !canShare();
+    $('report').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function fillWeeks() {
+    var select = $('week');
+    var dates = entryDates();
+    var thisWeek = weekStartOf(new Date());
+    var earliest = dates.length ? weekStartOf(fromKey(dates[0])) : thisWeek;
+    if (earliest > thisWeek) earliest = thisWeek;
+    select.textContent = '';
+    for (var start = thisWeek; start >= earliest; start = addDays(start, -7)) {
+      var end = addDays(start, 6);
+      var option = document.createElement('option');
+      option.value = toKey(start);
+      option.textContent = MONTHS[start.getMonth()] + ' ' + start.getDate() + ' – ' +
+        MONTHS[end.getMonth()] + ' ' + end.getDate() + ', ' + end.getFullYear();
+      select.appendChild(option);
+    }
+  }
+
+  function csvFile() {
+    return new File(['﻿' + delimited(current.rows, ',')], current.name, { type: 'text/csv' });
+  }
+  function canShare() {
+    try {
+      return !!(navigator.canShare && navigator.canShare({ files: [csvFile()] }));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  $('weekReport').onclick = function () {
+    var start = fromKey($('week').value);
+    var end = addDays(start, 6);
+    showReport('ro-diary-' + isoDate(start) + '-to-' + isoDate(end) + '.csv', buildRows(start, end));
+  };
+
+  $('allReport').onclick = function () {
+    var dates = entryDates();
+    if (!dates.length) {
+      showReport('ro-diary-all.csv', [['Date'].concat(columnsFor([]).map(function (q) { return q.label; }))]);
+      $('status').textContent = 'Nothing has been recorded yet.';
+      return;
+    }
+    showReport('ro-diary-all.csv', buildRows(fromKey(dates[0]), fromKey(dates[dates.length - 1])));
+  };
+
+  $('download').onclick = function () {
+    var link = document.createElement('a');
+    link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent('﻿' + delimited(current.rows, ','));
+    link.download = current.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    $('status').textContent = 'If no download starts, use Copy for spreadsheet or copy the text below.';
+  };
+
+  $('share').onclick = function () {
+    navigator.share({ files: [csvFile()], title: current.name }).catch(function () {});
+  };
+
+  $('copy').onclick = function () {
+    // Tab-separated text pastes straight into cells in Sheets, Excel and Numbers.
+    var text = delimited(current.rows, '\t');
+    var done = function (ok) {
+      $('status').textContent = ok
+        ? 'Copied. Paste into a spreadsheet.'
+        : 'Could not copy automatically. Select the text below and copy it.';
+    };
+    var legacy = function () {
+      var area = document.createElement('textarea');
+      area.value = text;
+      document.body.appendChild(area);
+      area.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(area);
+      done(ok);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, legacy);
+    } else {
+      legacy();
+    }
+  };
+
+  $('weekStart').onchange = fillWeeks;
+
+  // --------------------------------------------------------------- questions
+
+  function renderQuestions() {
+    [1, 2].forEach(function (section) {
+      var list = $('list' + section);
+      list.textContent = '';
+      var mine = questions.filter(function (q) { return q.section === section; });
+      if (!mine.length) {
+        var empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = 'Nothing here yet.';
+        list.appendChild(empty);
+      }
+      mine.forEach(function (question, position) {
+        list.appendChild(questionRow(question, position, mine));
+      });
+    });
+    var full = questions.length >= MAX_CUSTOM;
+    Array.prototype.forEach.call(document.querySelectorAll('.add'), function (button) {
+      button.disabled = full;
+      button.textContent = full ? 'Limit of ' + MAX_CUSTOM + ' questions reached' : 'Add a question';
+    });
+  }
+
+  function questionRow(question, position, siblings) {
+    var wrap = document.createElement('div');
+    wrap.className = 'question';
+
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 60;
+    input.placeholder = 'What do you want to track?';
+    input.value = question.label;
+    input.setAttribute('aria-label', 'Question');
+    input.oninput = function () { question.label = input.value; };
+    wrap.appendChild(input);
+
+    var row = document.createElement('div');
+    row.className = 'row';
+
+    var type = document.createElement('select');
+    type.setAttribute('aria-label', 'Answer type');
+    [['0', 'Rating 0–5'], ['1', 'Yes / No']].forEach(function (pair) {
+      var option = document.createElement('option');
+      option.value = pair[0];
+      option.textContent = pair[1];
+      type.appendChild(option);
+    });
+    type.value = String(question.type);
+    // Changing the type of a saved question would scramble its past answers.
+    type.disabled = question.id != null;
+    type.onchange = function () { question.type = Number(type.value); };
+    row.appendChild(type);
+
+    row.appendChild(iconButton('↑', 'Move up', position === 0, function () {
+      swap(question, siblings[position - 1]);
+    }));
+    row.appendChild(iconButton('↓', 'Move down', position === siblings.length - 1, function () {
+      swap(question, siblings[position + 1]);
+    }));
+    var remove = iconButton('✕', 'Remove', false, function () {
+      questions.splice(questions.indexOf(question), 1);
+      renderQuestions();
+    });
+    remove.className = 'remove';
+    row.appendChild(remove);
+
+    wrap.appendChild(row);
+    return wrap;
+  }
+
+  function iconButton(text, label, disabled, onclick) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = text;
+    button.disabled = disabled;
+    button.setAttribute('aria-label', label);
+    button.onclick = onclick;
+    return button;
+  }
+
+  function swap(a, b) {
+    var i = questions.indexOf(a);
+    var j = questions.indexOf(b);
+    questions[i] = b;
+    questions[j] = a;
+    renderQuestions();
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.add'), function (button) {
+    button.onclick = function () {
+      var section = Number(button.getAttribute('data-section'));
+      questions.push({ id: null, section: section, type: 0, label: '' });
+      renderQuestions();
+      var inputs = $('list' + section).querySelectorAll('input[type=text]');
+      inputs[inputs.length - 1].focus();
+    };
+  });
+
+  // -------------------------------------------------------------------- save
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  $('save').onclick = function () {
+    var time = ($('reminderTime').value || '21:00').split(':');
+    var result = {
+      reminderEnabled: $('reminderEnabled').checked,
+      hour: Number(time[0]),
+      minute: Number(time[1]),
+      snooze: Number($('snooze').value),
+      weekStart: Number($('weekStart').value),
+      questions: questions.filter(function (q) { return q.label.trim(); })
+    };
+    if (standalone) {
+      alert('Preview only. This would be saved:\n\n' + JSON.stringify(result, null, 2));
+      return;
+    }
+    // The Pebble emulator passes its own return address; phones use pebblejs://.
+    var match = /[?&]return_to=([^&#]*)/.exec(location.href);
+    var returnTo = match ? decodeURIComponent(match[1]) : 'pebblejs://close#';
+    location.href = returnTo + encodeURIComponent(JSON.stringify(result));
+  };
+
+  // -------------------------------------------------------------------- init
+
+  function sampleState() {
+    var sample = {
+      settings: {
+        reminderEnabled: true, hour: 21, minute: 0, snooze: 15, weekStart: 1,
+        questions: [
+          { id: 10, section: 1, type: 0, label: 'Shame' },
+          { id: 11, section: 1, type: 0, label: 'Urge to walk away' },
+          { id: 12, section: 2, type: 1, label: 'Pretended to be OK' },
+          { id: 13, section: 2, type: 0, label: 'Old question', archived: true }
+        ]
+      },
+      entries: {}
+    };
+    for (var back = 12; back >= 1; back--) {
+      if (back === 4) continue;
+      var key = toKey(addDays(new Date(), -back));
+      sample.entries[key] = { 1: back % 5, 2: back % 2, 3: 0, 10: (back * 3) % 11, 11: 5, 12: back % 3 ? 1 : 0 };
+      if (back > 9) sample.entries[key][13] = 4;
+    }
+    return sample;
+  }
+
+  $('reminderEnabled').checked = !!settings.reminderEnabled;
+  $('reminderTime').value = pad(settings.hour) + ':' + pad(settings.minute);
+  $('snooze').value = String(settings.snooze);
+  if (!$('snooze').value) $('snooze').value = '15';
+  $('weekStart').value = String(settings.weekStart);
+  if (!$('weekStart').value) $('weekStart').value = '1';
+  renderQuestions();
+  fillWeeks();
+})();
+</script>
+</body>
+</html>
