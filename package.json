@@ -1,9 +1,11 @@
 {
   "name": "radically-open-journal",
   "author": "",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "RO-DBT diary card tracker for Pebble",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": true,
   "dependencies": {},
   "pebble": {
@@ -11,11 +13,21 @@
     "uuid": "5c2d56e8-ce53-43d9-b666-cae3967cd13b",
     "sdkVersion": "3",
     "enableMultiJS": true,
-    "targetPlatforms": ["aplite", "basalt", "chalk", "diorite", "emery", "flint", "gabbro"],
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite",
+      "emery",
+      "flint",
+      "gabbro"
+    ],
     "watchapp": {
       "watchface": false
     },
-    "capabilities": ["configurable"],
+    "capabilities": [
+      "configurable"
+    ],
     "messageKeys": [
       "READY",
       "CFG_BEGIN",
