@@ -36,17 +36,24 @@ day starts it over (pre-filled from the latest day) and replaces it on save.
 
 ## Building
 
-The dev shell provides the Pebble SDK, compiler and emulator:
-
 ```sh
-nix develop
-pebble build
+nix-shell                            # pebble.nix pinned with npins (see shell.nix)
+pebble sdk install 4.9.169           # once; newer SDKs need pebble-tool >= 5.1
+pebble build                         # -> build/radically-open-journal.pbw
 pebble install --emulator basalt     # or aplite, chalk, diorite, emery, flint, gabbro
-pebble install --phone <phone ip>    # with the developer connection enabled in the phone app
 ```
 
-The built app is `build/radically-open-journal.pbw`, which can also be
-sideloaded from the phone.
+## Releasing and installing
+
+Pushing to the `release` branch runs `.github/workflows/release.yml`, which
+builds the app and publishes `radically-open-journal-v<version>.pbw` as a GitHub
+release (version from `package.json`). Open that file on the phone to install
+it. After a release, the workflow bumps the version on `main`; if the version
+on `release` is already published, the run stops without building.
+
+```sh
+git push origin main:release
+```
 
 To work on the settings page, open `config/index.html` in a browser. Outside the
 phone app it loads sample data and Save only shows what would be stored.
